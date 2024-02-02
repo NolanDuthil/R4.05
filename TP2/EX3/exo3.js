@@ -78,14 +78,14 @@ moonMesh.scale.set(.5, .5, .5);
 moonOrbit.add(moonMesh);
 objects.push(moonMesh);
 
-const torusMesh = new THREE.Mesh(radius, tubeRadius,
-    radialSegments, tubularSegments,
-    arc);
-
-const torusMaterial = new THREE.MeshPhongMaterial({
-    color: 0x888888, emissive: 0x222222, emissiveMap: new THREE.TextureLoader().load('./images/moon.jpg'),
-    emissiveIntensity: 1
+const TorusGeometry = new THREE.TorusGeometry( 10, 0.1, 30 ,200);
+const torusMaterial = new THREE.MeshBasicMaterial( {
+    color: 0xffffff
 });
+const torus = new THREE.Mesh(TorusGeometry, torusMaterial);
+torus.rotation.set(Math.PI* 0.5 ,0,0);
+scene.add(torus);
+
 
 // Camera
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
@@ -140,8 +140,8 @@ const loop = () => {
     controls.update();
     renderer.render(scene, camera);
     window.requestAnimationFrame(loop);
-    scene.add(new THREE.AxesHelper(10));
-    scene.add(new THREE.PointLightHelper(light));
+    //scene.add(new THREE.AxesHelper(10));
+    //scene.add(new THREE.PointLightHelper(light));
     grille.visible = obj.grille;
     // Pour la mise à jour
     stats.update();
