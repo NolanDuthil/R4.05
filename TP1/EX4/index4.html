@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP1</title>
+    <link rel="stylesheet" href="styles4.css">
+
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+       {
+           "imports": {
+               "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+               "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+       }
+   }
+   </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+
+
+<body>
+    <canvas class="webgl">
+        <p><code>pageX</code>: <span id="x">n/a</span></p>
+        <p><code>pageY</code>: <span id="y">n/a</span></p>
+    </canvas>
+    <script type="module" src="./exo4.js"></script>
+</body>
+
+</html>
