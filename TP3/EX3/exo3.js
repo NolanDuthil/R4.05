@@ -20,25 +20,13 @@ plane.receiveShadow = true;
 plane.rotation.set(Math.PI * -0.5, 0, 0);
 scene.add(plane);
 
-const loader = new GLTFLoader();
-
-let model;
-
-loader.load('./assets/Rocketship.glb', function (glb) {
-  model = glb.scene;
-  scene.add(model);
-
-  model.traverse(function (node) {
-    if (node.isMesh)
-      node.castShadow = true;
-  });
-
-
-}, undefined, function (error) {
-
-  console.error(error);
-
-});
+const geometryBox = new THREE.BoxGeometry( 2.5, 5, 1 ); 
+const materialBox = new THREE.MeshBasicMaterial( {color: 0x73c2fb} ); 
+const box = new THREE.Mesh( geometryBox, materialBox );
+box.translateY(3);
+box.castShadow = true; //default is false
+box.receiveShadow = false;
+scene.add( box );
 
 
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -91,22 +79,9 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-let modelX = 0;
-
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 const loop = () => {
-
-  modelX = modelX + 0.1;
-  if (model) {
-    if (model.position.y > 40) {
-      modelX = 0;
-      model.position.set(0, 0, 0);
-    }
-    else {
-      model.position.set(0, modelX, 0);
-    }
-  }
 
   controls.update();
   stats.update();
