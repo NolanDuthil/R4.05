@@ -13,33 +13,32 @@ const scene = new THREE.Scene();
 
 scene.background = new THREE.CubeTextureLoader().setPath('./assets/').load(['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']);
 
-const planeGeometry = new THREE.PlaneGeometry( 25, 25, 32, 32 );
-const planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffc0cb } )
-const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+const planeGeometry = new THREE.PlaneGeometry(25, 25, 32, 32);
+const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffc0cb })
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.receiveShadow = true;
 plane.rotation.set(Math.PI * -0.5, 0, 0);
-scene.add( plane );
+scene.add(plane);
 
 const loader = new GLTFLoader();
 
 let model;
 
-loader.load( './assets/Rocketship.glb', function ( glb ) {
+loader.load('./assets/Rocketship.glb', function (glb) {
   model = glb.scene;
-	scene.add( model );
+  scene.add(model);
 
-  model.traverse(function(node) {
-    if(node.isMesh)
-        node.castShadow = true;
+  model.traverse(function (node) {
+    if (node.isMesh)
+      node.castShadow = true;
   });
 
-  loop();
 
-}, undefined, function ( error ) {
+}, undefined, function (error) {
 
-	console.error( error );
+  console.error(error);
 
-} );
+});
 
 
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -62,8 +61,8 @@ light.shadow.camera.bottom = -100;
 
 
 
-const helper = new THREE.CameraHelper( light.shadow.camera );
-scene.add( helper );
+const helper = new THREE.CameraHelper(light.shadow.camera);
+scene.add(helper);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
@@ -74,7 +73,7 @@ camera.lookAt(0, 0, 0);
 
 // Renderer
 const canvas = document.querySelector(".webgl");
-const renderer = new THREE.WebGLRenderer({canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -86,10 +85,10 @@ function Renderer() {
 requestAnimationFrame(Renderer);
 
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.render(scene, camera);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.render(scene, camera);
 });
 
 let modelX = 0;
@@ -98,16 +97,23 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 const loop = () => {
 
-    modelX = modelX + 0.01;
-    model.position.set(0, modelX,0);
-    if(model.position == 0.05 ){
-      model.position.set(0,0,0);
+  modelX = modelX + 0.1;
+  if (model) {
+    if (model.position.y > 40) {
+      modelX = 0;
+      model.position.set(0, 0, 0);
     }
+    else {
+      model.position.set(0, modelX, 0);
+    }
+  }
 
-    controls.update();
-    stats.update();
-    renderer.render(scene, camera);
-    window.requestAnimationFrame(loop);
-    // Pour la mise à jour
+  controls.update();
+  stats.update();
+  renderer.render(scene, camera);
+  window.requestAnimationFrame(loop);
+  // Pour la mise à jour
 
 }
+
+loop();
