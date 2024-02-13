@@ -20,13 +20,8 @@ plane.receiveShadow = true;
 plane.rotation.set(Math.PI * -0.5, 0, 0);
 scene.add(plane);
 
-const geometryBox = new THREE.BoxGeometry( 2.5, 5, 1 ); 
-const materialBox = new THREE.MeshBasicMaterial( {color: 0x73c2fb} ); 
-const box = new THREE.Mesh( geometryBox, materialBox );
-box.translateY(3);
-box.castShadow = true; //default is false
-box.receiveShadow = false;
-scene.add( box );
+
+scene.add(box);
 
 
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -92,3 +87,13 @@ const loop = () => {
 }
 
 loop();
+
+function createBox() {
+  const geometryBox = new THREE.BoxGeometry(2.5, 5, 1);
+  const materialBox = new THREE.MeshBasicMaterial({ color: 0x73c2fb });
+  const box = new THREE.Mesh(geometryBox, materialBox);
+  box.translateY(3);
+  box.castShadow = true; //default is false
+  box.receiveShadow = false;
+  return box;
+}
