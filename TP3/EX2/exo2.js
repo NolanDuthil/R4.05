@@ -40,38 +40,6 @@ loader.load('./assets/Rocketship.glb', function (glb) {
 
 });
 
-function onPointerMove( event ) {
-
-	// calculate pointer position in normalized device coordinates
-	// (-1 to +1) for both components
-
-	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-}
-
-function render() {
-
-	// update the picking ray with the camera and pointer position
-	raycaster.setFromCamera( pointer, camera );
-
-	// calculate objects intersecting the picking ray
-	const intersects = raycaster.intersectObjects( scene.children );
-
-	for ( let i = 0; i < intersects.length; i ++ ) {
-
-		intersects[ i ].object.material.color.set( 0xff0000 );
-
-	}
-
-	renderer.render( scene, camera );
-
-}
-
-window.addEventListener( 'pointermove', onPointerMove );
-
-window.requestAnimationFrame(render);
-
 
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
 light.position.set(50, 100, 10);
@@ -109,12 +77,9 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-function Renderer() {
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.render(scene, camera);
-}
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.render(scene, camera);
 
-requestAnimationFrame(Renderer);
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -123,22 +88,9 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-let modelX = 0;
-
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 const loop = () => {
-
-  modelX = modelX + 0.1;
-  if (model) {
-    if (model.position.y > 40) {
-      modelX = 0;
-      model.position.set(0, 0, 0);
-    }
-    else {
-      model.position.set(0, modelX, 0);
-    }
-  }
 
   controls.update();
   stats.update();
@@ -149,3 +101,63 @@ const loop = () => {
 }
 
 loop();
+
+let speed = 0;
+
+const animation = () => {
+    
+    
+    if (scene.children[3]!=undefined) {
+        if (speed<10) {
+            speed+=0.1;
+            scene.children[3].position.y = speed;    
+            
+            window.requestAnimationFrame(animation);
+        }
+        else {
+            scene.children[3].position.y =0;
+        }
+
+    }
+
+
+    renderer.render(scene, camera);
+}
+
+
+
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function onPointerClick( event ) {
+
+	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+
+    window.requestAnimationFrame(render);
+
+}
+
+
+function render() {
+
+
+	raycaster.setFromCamera( pointer, camera );
+
+	const intersects = raycaster.intersectObjects( scene.children );
+
+	for ( let i = 0; i < intersects.length; i ++ ) {
+        
+        if (intersects[i].object.castShadow==true) {
+            scene.children[3].position.y = 0;
+            speed = 0;
+            animation();       
+        }
+
+	}
+
+}
+
+window.addEventListener( 'pointerdown', onPointerClick );
