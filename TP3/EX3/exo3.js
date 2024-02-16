@@ -70,29 +70,36 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-let counter = 0;
 let x = 15;
 let y = 9;
 
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-let loop = () => {
 
-  while (counter < 70) {
-    const cubeGeometry = new THREE.BoxGeometry(1, Math.floor(Math.random() * (10 - 3)) + 3, 1);
+const nombreMaxCubes = 70; // Définir le nombre maximal de cubes à générer
+let cubesGenerated = 0; // Variable pour suivre le nombre de cubes générés
+
+function loop() {
+  const initialY = 5; // Stocker la position y initiale constante du cube
+  
+  if (cubesGenerated < nombreMaxCubes) {
+    const boxHeight = Math.floor(Math.random() * (10 - 3)) + 3; // Taille variable du cube
+    const cubeGeometry = new THREE.BoxGeometry(1, boxHeight, 1);
     const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
     const box = new THREE.Mesh(cubeGeometry, cubeMaterial);
     box.receiveShadow = true;
     box.castShadow = true;
 
     if (x <= -10) {
-      y-=2;
+      y -= 2;
       x = 15;
     }
-    box.position.set(x-=4, 5, y); 
+    
+    // Définir la position en tenant compte de la hauteur variable mais en gardant y constant
+    box.position.set(x -= 4, initialY + boxHeight / 2, y); 
     scene.add(box);
 
-    counter++;
+    cubesGenerated++;
   }
     
   controls.update();
