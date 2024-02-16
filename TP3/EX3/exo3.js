@@ -20,10 +20,6 @@ plane.receiveShadow = true;
 plane.rotation.set(Math.PI * -0.5, 0, 0);
 scene.add(plane);
 
-
-scene.add(box);
-
-
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
 light.position.set(50, 100, 10);
 light.target.position.set(0, 0, 0);
@@ -74,26 +70,36 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
+let counter = 0;
+let x = 15;
+let y = 9;
+
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-const loop = () => {
+let loop = () => {
 
+  while (counter < 70) {
+    const cubeGeometry = new THREE.BoxGeometry(1, Math.floor(Math.random() * (10 - 3)) + 3, 1);
+    const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+    const box = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    box.receiveShadow = true;
+    box.castShadow = true;
+
+    if (x <= -10) {
+      y-=2;
+      x = 15;
+    }
+    box.position.set(x-=4, 5, y); 
+    scene.add(box);
+
+    counter++;
+  }
+    
   controls.update();
   stats.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(loop);
-  // Pour la mise à jour
-
 }
 
 loop();
 
-function createBox() {
-  const geometryBox = new THREE.BoxGeometry(2.5, 5, 1);
-  const materialBox = new THREE.MeshBasicMaterial({ color: 0x73c2fb });
-  const box = new THREE.Mesh(geometryBox, materialBox);
-  box.translateY(3);
-  box.castShadow = true; //default is false
-  box.receiveShadow = false;
-  return box;
-}
