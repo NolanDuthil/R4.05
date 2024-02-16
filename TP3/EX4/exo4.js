@@ -13,18 +13,18 @@ const scene = new THREE.Scene();
 
 scene.background = new THREE.CubeTextureLoader().setPath('./assets/').load(['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']);
 
-const planeGeometry = new THREE.PlaneGeometry(25, 25, 32, 32);
+const planeGeometry = new THREE.PlaneGeometry(30, 30, 32, 32);
 const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffc0cb })
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.receiveShadow = true;
 plane.rotation.set(Math.PI * -0.5, 0, 0);
 scene.add(plane);
 
-const cylinderGeometry = new THREE.CylinderGeometry(.5,.5,20,10);
+const cylinderGeometry = new THREE.CylinderGeometry(.5,.5,25,10);
 const cylinderMaterial = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
 const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
 cylinder.receiveShadow = true;
-cylinder.position.set(0,15,0)
+cylinder.position.set(0,15,-2)
 cylinder.rotation.set(Math.PI * -0.5, 0, 0);
 scene.add(cylinder);
 
@@ -48,6 +48,41 @@ const cylinder2 = new THREE.Mesh(cylinder2Geometry, cylinder2Material);
 cylinder2.receiveShadow = true;
 cylinder2.position.set(0,11.5,2)
 scene.add(cylinder2);
+
+const sphere2Geometry = new THREE.SphereGeometry(2,20,10);
+const sphere2Material = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
+const sphere2 = new THREE.Mesh(sphere2Geometry, sphere2Material);
+sphere2.receiveShadow = true;
+sphere2.position.set(0,6,2)
+scene.add(sphere2);
+
+const cylinder3Geometry = new THREE.CylinderGeometry(0.25,0.25,5,20);
+const cylinder3Material = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
+const cylinder3 = new THREE.Mesh(cylinder3Geometry, cylinder3Material);
+cylinder3.receiveShadow = true;
+cylinder3.position.set(0,12.5,-4)
+scene.add(cylinder3);
+
+const sphere3Geometry = new THREE.SphereGeometry(2,20,10);
+const sphere3Material = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
+const sphere3 = new THREE.Mesh(sphere3Geometry, sphere3Material);
+sphere3.receiveShadow = true;
+sphere3.position.set(0,8,-4)
+scene.add(sphere3);
+
+const cylinder4Geometry = new THREE.CylinderGeometry(0.25,0.25,3,20);
+const cylinder4Material = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
+const cylinder4 = new THREE.Mesh(cylinder4Geometry, cylinder4Material);
+cylinder4.receiveShadow = true;
+cylinder4.position.set(0,13.5,-10)
+scene.add(cylinder4);
+
+const sphere4Geometry = new THREE.SphereGeometry(2,20,10);
+const sphere4Material = new THREE.MeshStandardMaterial({ color: 0xA3B6F9 })
+const sphere4 = new THREE.Mesh(sphere4Geometry, sphere4Material);
+sphere4.receiveShadow = true;
+sphere4.position.set(0,10,-10)
+scene.add(sphere4);
 
 const light = new THREE.DirectionalLight(0xFFFFFF, 1);
 light.position.set(50, 100, 10);
