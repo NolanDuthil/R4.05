@@ -30,6 +30,10 @@ const moonOrbit = new THREE.Object3D();
 moonOrbit.position.x = 2;
 earthOrbit.add(moonOrbit);
 
+const SaturneOrbit = new THREE.Object3D();
+SaturneOrbit.position.x = 20;
+solarSystem.add(SaturneOrbit);
+
 // use just one sphere for everything
 const radius = 1;
 const widthSegments = 24;
@@ -72,6 +76,16 @@ const moonMaterial = new THREE.MeshPhongMaterial({
     color: 0x888888, emissive: 0x222222, emissiveMap: new THREE.TextureLoader().load('./images/moon.jpg'),
     emissiveIntensity: 1
 });
+
+const SaturneMaterial = new THREE.MeshPhongMaterial({
+    color: 0x888888, emissive: 0x222222, emissiveMap: new THREE.TextureLoader().load('./images/saturn.jpg'),
+    emissiveIntensity: 1
+});
+
+const SaturneMesh = new THREE.Mesh(sphereGeometry, SaturneMaterial);
+SaturneMesh.scale.set(3, 3, 3);
+SaturneOrbit.add(SaturneMesh);
+objects.push(SaturneMesh);
 
 const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
 moonMesh.scale.set(.5, .5, .5);
