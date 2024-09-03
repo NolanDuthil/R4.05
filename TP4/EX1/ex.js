@@ -5,6 +5,8 @@ import Stats from 'three/addons/libs/stats.module.js';
 const canvas = document.querySelector('.webgl')
 const scene = new THREE.Scene()
 
+scene.background = new THREE.CubeTextureLoader().setPath('./assets/').load(['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']);
+
 const container = document.getElementById('container');
 const stats = new Stats();
 container.appendChild(stats.dom);
@@ -47,7 +49,8 @@ const render = () => {
 
 // Camera
 const camera = new THREE.PerspectiveCamera(100, sizes.width / sizes.height, 0.1, 1000)
-camera.position.z = 5
+camera.position.set(0, 5, 10);
+camera.lookAt(0, -2, 0);
 scene.add(camera)
 
 window.addEventListener('resize', () =>
