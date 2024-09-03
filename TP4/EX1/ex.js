@@ -41,7 +41,7 @@ const render = () => {
 }
 
 // Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
+const camera = new THREE.PerspectiveCamera(100, sizes.width / sizes.height, 0.1, 1000)
 camera.position.z = 5
 scene.add(camera)
 
@@ -71,14 +71,15 @@ lightDirectional.position.set(5, 5, 5)
 
 // Figure
 class Figure {
-	constructor(params) {
+	constructor() {
 		this.params = {
 			x: 0,
-			y: 0,
+			y: 1.4,
 			z: 0,
 			ry: 0,
-			...params
-		}
+			armRotation: 0
+		};
+ 
 		
 		// Create group and add to scene
 		this.group = new THREE.Group()
@@ -150,7 +151,7 @@ class Figure {
 			arm.position.y = height * -0.5
 			
 			// Position the arm relative to the figure
-			armGroup.position.x = m * 0.8
+			armGroup.position.x = m * .66
 			armGroup.position.y = 0.6
 			
 			// Rotate the arm
@@ -171,7 +172,7 @@ class Figure {
 			const m = i % 2 === 0 ? 1 : -1
 			
 			eyes.add(eye)
-			eye.position.x = 0.36 * m
+			eye.position.x = 0.66 * m
 		}
 		
 		this.head.add(eyes)
@@ -189,7 +190,7 @@ class Figure {
 			const m = i % 2 === 0 ? 1 : -1
 			
 			legs.add(leg)
-			leg.position.x = m * 0.22
+			leg.position.x = m * 0.2
 		}
 		
 		this.group.add(legs)
@@ -199,8 +200,8 @@ class Figure {
 	}
 	
 	bounce() {
-		this.group.rotation.y = this.params.ry
-		this.group.position.y = this.params.y
+		this.group.rotation.x = this.params.ry
+		this.group.rotation.x = this.params.ry
 		this.arms.forEach((arm, index) => {
 			const m = index % 2 === 0 ? 1 : -1
 			arm.rotation.z = this.params.armRotation * m
@@ -224,16 +225,17 @@ gsap.set(figure.params, {
 gsap.to(figure.params, {
 	ry: degreesToRadians(360),
 	repeat: -1,
-	duration: 20
+	duration: .9
 })
 
 gsap.to(figure.params, {
-	y: 0,
+	y: 3,
 	armRotation: degreesToRadians(90),
 	repeat: -1,
 	yoyo: true,
 	duration: 0.5
-})
+ })
+ 
 
 gsap.ticker.add(() => {
 	figure.bounce()
