@@ -104,7 +104,9 @@ class Figure {
             y: 1.4,
             z: 0,
             ry: 0,
-            armRotation: 0
+            armRotation: 0,
+            headRotation: 0,
+            leftEyeScale: 0
         };
 
         // Create group and add to scene
@@ -142,7 +144,7 @@ class Figure {
         this.head = new THREE.Group();
 
         // Create the main cube of the head and add to the group
-        const geometry = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+        const geometry = new THREE.SphereGeometry(.85, 30, 15);
         const headMain = new THREE.Mesh(geometry, this.headMaterial);
         headMain.castShadow = true;
 
@@ -156,7 +158,24 @@ class Figure {
 
         // Add the eyes
         this.createEyes();
+
+        
+        const antennaGeometry = new THREE.CylinderGeometry(.03,.03,.8,8)
+        const antenna1 = new THREE.Mesh(antennaGeometry, this.headMaterial);
+        antenna1.position.set(-.55,.8,0);
+        antenna1.rotation.z = Math.PI / 6;
+        antenna1.castShadow = true;
+        this.head.add(antenna1);
+
+        const antenna2 = new THREE.Mesh(antennaGeometry, this.headMaterial);
+        antenna2.position.set(.55,.8,0);
+        antenna2.rotation.z = Math.PI / -6;
+        antenna2.castShadow = true;
+        this.head.add(antenna2);
+
     }
+
+
 
     createArms() {
         const height = 0.85;
@@ -200,6 +219,7 @@ class Figure {
 
             eyes.add(eye);
             eye.position.x = 0.36 * m;
+            if (m == -1) this.lefteye = eye;
         }
 
         this.head.add(eyes);
@@ -226,13 +246,15 @@ class Figure {
         this.body.add(legs);
     }
 
-    bounce() {
+    update() {
         this.group.rotation.y = this.params.ry;
         this.group.position.y = this.params.y;
         this.arms.forEach((arm, index) => {
             const m = index % 2 === 0 ? 1 : -1;
             arm.rotation.z = this.params.armRotation * m;
         });
+        this.head.rotation.z = this.params.headRotation;
+        this.lefteye.scale.x = this.lefteye.scale.y = this.lefteye.scale.z = this.params.leftEyeScale;
     }
 
     init() {
@@ -245,7 +267,7 @@ class Figure {
 const figure = new Figure();
 figure.init();
 
-gsap.to(figure.params, {
+/*gsap.to(figure.params, {
 	ry: degreesToRadians(360),
 	repeat: -1,
 	duration: 20
@@ -257,7 +279,46 @@ gsap.to(figure.params, {
 	repeat: -1,
 	yoyo: true,
 	duration: 0.5
-})
+})*/
+
+let jumpTimeline = gsap.timeline();
+document.addEventListener('keydown', (event) => {
+    if ((event.key == ' ') && (jumpTimeline.isActive() == false)) {
+        jumpTimeline.to(figure.params, {
+            y: 3,
+            armRotation: degreesToRadians(90), 
+            repeat: 1,
+            yoyo: true,
+            duration: 0.5
+        })
+    }
+    if (event.key == 'ArrowLeft') {
+        figure.params.ry += .1;
+    }
+
+    if (event.key == 'ArrowRight') {
+        figure.params.ry -= .1;
+    }
+
+});
+
+let idleTimeline = gsap.timeline();
+idleTimeline.to(figure.params, {
+    headRotation: .25,
+    repeat: 1,
+    yoyo: true,
+    duration: .75,
+    delay: 2.5,
+    ease: "back.in"
+});
+
+idleTimeline.to(figure.params, {
+    leftEyeScale: 1.25,
+    repeat: 1,
+    yoyo: true,
+    duration: 1 
+},  ">2.2")
+
 
 // Main loop
 gsap.ticker.add(() => {
@@ -266,7 +327,10 @@ gsap.ticker.add(() => {
     camHelper.visible = params.showHelpers;
     gridHelper.visible = params.showHelpers;
 
-    figure.bounce();
+    if ((idleTimeline.isActive() == false) && (jumpTimeline.isActive() ==false)){
+        idleTimeline.restart();
+    }
+    figure.update();
     controls.update();
     stats.update();
     renderer.render(scene, camera);
