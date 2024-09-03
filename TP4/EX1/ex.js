@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 const canvas = document.querySelector('.webgl')
 const scene = new THREE.Scene()
 
-scene.background = new THREE.CubeTextureLoader().setPath('./assets/').load(['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']);
+scene.background = new THREE.CubeTextureLoader().setPath('./assets/').load(['posx.png', 'negx.png', 'posy.png', 'negy.png', 'posz.png', 'negz.png']);
 
 const container = document.getElementById('container');
 const stats = new Stats();
@@ -65,6 +66,12 @@ window.addEventListener('resize', () =>
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
 })
+
+
+// Controls
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 // Material
 const material = new THREE.MeshLambertMaterial({ color: 0xffffff })
@@ -264,6 +271,3 @@ const divisions = 10;
 
 const gridHelper = new THREE.GridHelper( size, divisions );
 scene.add( gridHelper );
-
-const helper = new THREE.CameraHelper( lightDirectional ) ;
-scene.add( helper );
