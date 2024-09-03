@@ -40,6 +40,8 @@ const random = (min, max, float = false) => {
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({ canvas })
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const render = () => {
 	renderer.setSize(sizes.width, sizes.height)
@@ -48,8 +50,8 @@ const render = () => {
 }
 
 // Camera
-const camera = new THREE.PerspectiveCamera(100, sizes.width / sizes.height, 0.1, 1000)
-camera.position.set(0, 5, 10);
+const camera = new THREE.PerspectiveCamera(80, sizes.width / sizes.height, 0.1, 1000)
+camera.position.set(0, 5, 20);
 camera.lookAt(0, -2, 0);
 scene.add(camera)
 
@@ -262,3 +264,6 @@ const divisions = 10;
 
 const gridHelper = new THREE.GridHelper( size, divisions );
 scene.add( gridHelper );
+
+const helper = new THREE.CameraHelper( lightDirectional ) ;
+scene.add( helper );
