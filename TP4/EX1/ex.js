@@ -200,8 +200,8 @@ class Figure {
 	}
 	
 	bounce() {
-		this.group.rotation.x = this.params.ry
-		this.group.rotation.x = this.params.ry
+		this.group.rotation.y = this.params.ry
+		this.group.rotation.y = this.params.ry
 		this.arms.forEach((arm, index) => {
 			const m = index % 2 === 0 ? 1 : -1
 			arm.rotation.z = this.params.armRotation * m
