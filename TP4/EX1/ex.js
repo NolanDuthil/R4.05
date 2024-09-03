@@ -1,8 +1,13 @@
 import * as THREE from 'three';
+import Stats from 'three/addons/libs/stats.module.js';
 
 
 const canvas = document.querySelector('.webgl')
 const scene = new THREE.Scene()
+
+const container = document.getElementById('container');
+const stats = new Stats();
+container.appendChild(stats.dom);
 
 const degreesToRadians = (degrees) => {
 	return degrees * (Math.PI / 180)
@@ -68,6 +73,13 @@ scene.add(lightDirectional)
 
 // Move the light source towards us
 lightDirectional.position.set(5, 5, 5)
+
+const planeGeometry = new THREE.PlaneGeometry( 25, 25, 32, 32 );
+const planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffc0cb } )
+const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+plane.receiveShadow = true;
+plane.rotation.set(Math.PI * -0.5, 0, 0);
+scene.add( plane );
 
 // Figure
 class Figure {
