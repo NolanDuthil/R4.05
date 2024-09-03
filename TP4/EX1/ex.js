@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 
 const canvas = document.querySelector('.webgl')
@@ -40,7 +41,7 @@ const random = (min, max, float = false) => {
 /**
  * Renderer
  */
-const renderer = new THREE.WebGLRenderer({ canvas })
+const renderer = new THREE.WebGLRenderer({canvas, antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -80,17 +81,33 @@ const material = new THREE.MeshLambertMaterial({ color: 0xffffff })
 const lightAmbient = new THREE.AmbientLight(0x9eaeff, 0.5)
 scene.add(lightAmbient)
 
-const lightDirectional = new THREE.DirectionalLight(0xffffff, 0.8)
-scene.add(lightDirectional)
+const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+light.position.set(50, 100, 10);
+light.target.position.set(0, 0, 0);
+light.castShadow = true;
+scene.add(light);
 
-// Move the light source towards us
-lightDirectional.position.set(5, 5, 5)
+
+light.shadow.bias = -0.001;
+light.shadow.mapSize.width = 2048;
+light.shadow.mapSize.height = 2048;
+light.shadow.camera.near = 50;
+light.shadow.camera.far = 150;
+light.shadow.camera.left = 100;
+light.shadow.camera.right = -100;
+light.shadow.camera.top = 100;
+light.shadow.camera.bottom = -100;
+
+
+const helper = new THREE.CameraHelper( light.shadow.camera );
+scene.add( helper );
 
 const planeGeometry = new THREE.PlaneGeometry( 25, 25, 32, 32 );
 const planeMaterial = new THREE.MeshStandardMaterial( { color: 0xffc0cb } )
 const plane = new THREE.Mesh( planeGeometry, planeMaterial );
 plane.receiveShadow = true;
-plane.rotation.set(Math.PI * -0.5, 0, 0);
+plane.rotation.set(Math.PI * -.5, 0, 0);
+plane.position.set(0,-3,0)
 scene.add( plane );
 
 // Figure
@@ -103,7 +120,6 @@ class Figure {
 			ry: 0,
 			armRotation: 0
 		};
- 
 		
 		// Create group and add to scene
 		this.group = new THREE.Group()
@@ -225,7 +241,7 @@ class Figure {
 	
 	bounce() {
 		this.group.rotation.y = this.params.ry
-		this.group.rotation.y = this.params.ry
+		this.group.position.y = this.params.y
 		this.arms.forEach((arm, index) => {
 			const m = index % 2 === 0 ? 1 : -1
 			arm.rotation.z = this.params.armRotation * m
@@ -241,6 +257,8 @@ class Figure {
 
 const figure = new Figure()
 figure.init()
+figure.castShadow = true;
+figure.receiveShadow = false;
 
 gsap.set(figure.params, {
 	y: -1.5
@@ -257,7 +275,7 @@ gsap.to(figure.params, {
 	armRotation: degreesToRadians(90),
 	repeat: -1,
 	yoyo: true,
-	duration: 0.5
+	duration: .45
  })
  
 
@@ -266,8 +284,20 @@ gsap.ticker.add(() => {
 	render()
 })
 
-const size = 10;
+const size = 25;
 const divisions = 10;
 
 const gridHelper = new THREE.GridHelper( size, divisions );
+gridHelper.position.set(0,-3,0)
 scene.add( gridHelper );
+
+const loop = () => {
+
+    controls.update();
+    stats.update();
+    renderer.render(scene, camera);
+    window.requestAnimationFrame(loop);
+    // Pour la mise à jour
+
+}
+loop();
