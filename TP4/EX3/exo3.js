@@ -454,4 +454,3 @@ gsap.ticker.add(() => {
     stats.update();
     renderer.render(scene, camera);
 });
-

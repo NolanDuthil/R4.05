@@ -11,7 +11,7 @@ const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
 
 // Fog
-scene.fog = new THREE.Fog(0xe0e0e0, 20, 100);
+// scene.fog = new THREE.Fog(0xe0e0e0, 20, 100);
 
 // Light
 let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -52,7 +52,7 @@ scene.add(gridHelper);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
-camera.position.set(10, 10, 20);
+camera.position.set();
 scene.add(camera);
 
 // Renderer
@@ -80,14 +80,19 @@ const container = document.getElementById('container');
 const stats = new Stats();
 container.appendChild(stats.dom);
 
-
-
 // GUI
 const gui = new GUI();
 const params = {
     showHelpers: true
 }
 gui.add(params, "showHelpers");
+
+// Original code from https://tympanus.net/codrops/2021/10/04/creating-3d-characters-in-three-js/
+const random = (min, max, float = false) => {
+    const val = Math.random() * (max - min) + min;
+    if (float) return val;
+    return Math.floor(val)
+}
 
 const degreesToRadians = (degrees) => {
     return degrees * (Math.PI / 180);
@@ -130,7 +135,7 @@ class Figure extends THREE.Group {
         super();
         this.params = {
             x: 0,
-            y: 1.4,
+            y: 0,
             z: 0,
             ry: 0,
         }
@@ -138,13 +143,15 @@ class Figure extends THREE.Group {
         this.position.x = this.params.x;
         this.position.y = this.params.y;
         this.position.z = this.params.z;
+        this.position.y = this.params.ry
 
         // model
         var self = this;
         const loader = new GLTFLoader();
         loader.load('./RobotExpressive.glb', function (gltf) {
 
-            self.add(gtlf.scene);
+            self.add(gltf.scene);
+            self.loadAnimations(gltf.scene, gltf.animations);
 
         }, undefined, function (e) {
 
@@ -154,7 +161,59 @@ class Figure extends THREE.Group {
 
     }
 
-    update() {
+
+
+    loadAnimations(model, animations) {
+        this.mixer = new THREE.AnimationMixer(model);
+
+        this.states = ["Idle", "Running", "Jump", "ThumbsUp"];
+        this.actions = {};
+
+        for (let i = 0; i < animations.length; i++) {
+            const clip = animations[i];
+            if (this.states.includes(clip.name)) {
+                const action = this.mixer.clipAction(clip);
+                this.actions[clip.name] = action;
+
+                if (clip.name == "Jump" || clip.name == "ThumbsUp") {
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+
+
+        }
+        this.state = "Idle"
+        this.actions[this.state].play();
+    }
+
+    fadeToAction(name, duration) {
+
+        if (!this.actions) return;
+
+        if (name === this.state ) return;
+
+        console.log(this.state, name);
+
+        this.actions[this.state].fadeOut(duration);
+
+        this.actions[name].reset()
+        .fadeIn(duration)
+        .play();
+
+        this.state = name;
+    }
+
+    update(dt) {
+        this.position.y = this.params.y;
+        this.position.x = this.params.x;
+        this.position.z = this.params.z;
+        this.rotation.y = this.params.ry;
+
+        if (this.mixer) {
+            this.mixer.update(dt);
+        }
+
         // bullet
         for (let i = bullets.length - 1; i >= 0; i--) {
             if (bullets[i].isAlive()) {
@@ -169,23 +228,28 @@ class Figure extends THREE.Group {
 }
 
 const figure = new Figure();
-figure.init();
+scene.add(figure);
+
+let jumpTimeline = gsap.timeline();
 
 gsap.registerPlugin(CustomEase);
+
+let rySpeed = 0;
+let walkSpeed = 0;
+let leftKeyIsDown = false;
+let rightKeyIsDown = false;
+let upKeyIsDown = false;
 
 let bullets = [];
 
 document.addEventListener('keydown', (event) => {
     if ((event.key == ' ') && (jumpTimeline.isActive() == false)) {
         jumpTimeline.to(figure.params, {
-            y: 3,
-            armRotation: degreesToRadians(90),
+            y: 1,
             repeat: 1,
+            duration: 0.4,
             yoyo: true,
-            duration: 0.5,
-            ease: CustomEase.create("custom", "M0,0 C0.479,-0.727 0.332,0.246 0.601,0.663 0.743,0.884 0.818,1.001 1,1 "),
-        })
-    }
+        })}
     if (event.key == 'q') {
         rySpeed += 0.05
         leftKeyIsDown = true
@@ -204,6 +268,7 @@ document.addEventListener('keydown', (event) => {
         let bullet = new Bullet(figure.params.x, figure.params.y, figure.params.z, figure.params.ry);
         scene.add(bullet);
         bullets.push(bullet);
+        figure.fadeToAction("ThumbsUp", 0.25);
     }
 
 
@@ -225,6 +290,8 @@ document.addEventListener('keyup', (event) => {
 
 });
 
+let clock = new THREE.Clock();
+
 
 // Main loop
 gsap.ticker.add(() => {
@@ -233,16 +300,43 @@ gsap.ticker.add(() => {
     camHelper.visible = params.showHelpers;
     gridHelper.visible = params.showHelpers;
 
+
+
     if (leftKeyIsDown) {
         rySpeed += .001;
     }
     if (rightKeyIsDown) {
-        rySpeed += .001;
+        rySpeed -= .001;
     }
     if (upKeyIsDown) {
-        walkSpeed += .001;
+        walkSpeed += .02;
+        figure.fadeToAction("Running", 0.25)
     }
-    figure.update();
+
+    if(jumpTimeline.isActive()){
+        figure.fadeToAction("Jump", 0.25);
+    }
+    else if ((!jumpTimeline.isActive()) && (rySpeed < 0.01) && (walkSpeed < 0.01)) {
+        figure.fadeToAction("Idle", 0.25);
+    }
+
+    figure.params.ry += rySpeed;
+    rySpeed *= 0.93;
+    figure.params.x += walkSpeed * Math.sin(figure.params.ry);
+    figure.params.z += walkSpeed * Math.cos(figure.params.ry);
+    walkSpeed *= .95;
+
+    const localCameraPosition = new THREE.Vector3(0,5,-25);
+    figure.localToWorld(localCameraPosition)
+    camera.position.copy(localCameraPosition)
+
+    camera.lookAt(new THREE.Vector3(figure.position.x, 5, figure.position.z,));
+
+    camera.updateProjectionMatrix();
+
+    let dt = clock.getDelta();
+
+    figure.update(dt);
     controls.update();
     stats.update();
     renderer.render(scene, camera);
