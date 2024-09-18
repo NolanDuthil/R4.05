@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -70,10 +69,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.render(scene, camera);
 });
-
-// Controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
 
 // Stats
 const container = document.getElementById('container');
@@ -337,7 +332,6 @@ gsap.ticker.add(() => {
     let dt = clock.getDelta();
 
     figure.update(dt);
-    controls.update();
     stats.update();
     renderer.render(scene, camera);
 });
