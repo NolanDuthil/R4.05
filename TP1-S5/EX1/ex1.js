@@ -2,6 +2,10 @@ import * as THREE from 'three';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import {FontLoader} from 'three/addons/loaders/FontLoader.js';
+import {TextGeometry} from 'three/addons/geometries/TextGeometry.js';
+
+THREE.Cache.enabled = true;
 
 // Scene
 const scene = new THREE.Scene();
@@ -10,7 +14,7 @@ const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
 
 // Fog
-// scene.fog = new THREE.Fog(0xe0e0e0, 20, 100);
+scene.fog = new THREE.Fog(0xe0e0e0, 20, 100);
 
 // Light
 let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -222,6 +226,31 @@ class Figure extends THREE.Group {
     }
 }
 
+let text = null;
+const fontLoader = new FontLoader();
+const myFont = "helvetiker_regular.typeface.json";
+const textMaterial = new THREE.MeshPhongMaterial({color: 0xff0000});
+function createText(count) {
+    scene.remove(text);
+    fontLoader.load(myFont, (font) => {
+        const textGeometry = new TextGeometry('shots:' + count, {
+            font: font,
+            size: 1,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelOffset: 0,
+            bevelSegments: 5
+        });
+        text = new THREE.Mesh(textGeometry, textMaterial);
+        text.position.set(0,2,0);
+        scene.add(text);
+    });
+}
+createText(0);
+
 const figure = new Figure();
 scene.add(figure);
 
@@ -333,6 +362,15 @@ gsap.ticker.add(() => {
 
     figure.update(dt);
     stats.update();
+    renderer.render(scene, camera);
+
+    if (text) {
+        const localTextPosition = new THREE.Vector3(-2,5,-20);
+        const textPosition = camera.localToWorld(localTextPosition);
+        text.lookAt(camera.position);
+        text.position.copy(textPosition);
+    }
+
     renderer.render(scene, camera);
 });
 
