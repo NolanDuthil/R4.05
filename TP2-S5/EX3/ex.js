@@ -2,17 +2,19 @@ import * as THREE from 'three';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import Mass from './Mass.js';
+import Spring from './Spring.js';
 
 THREE.Cache.enabled = true;
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xe0e0e0);
+scene.background = new THREE.Color(0x0e0e0e);
 const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
 
 // Fog
-scene.fog = new THREE.Fog(0xe0e0e0, 20, 100);
+// scene.fog = new THREE.Fog(0xe0e0e0, 20, 250);
 
 // Light
 let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -119,9 +121,79 @@ geometry.getAttribute("position").needsUpdate = true;
 
 
 
+const material = new THREE.MeshPhongMaterial({ color: 0xFFC0CB, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true, opacity: 0.5, transparent: true});
+
+let mesh = new THREE.Mesh(geometry, material);
+mesh.castShadow = true;
+
+scene.add(mesh);
+
+let masses = [];
+for (let i = 0 ; i < vertices.length ; i+=3)
+    masses.push(new Mass(vertices[i], vertices[i+1], vertices[i+2]));
+
+let springs = [];
+for (let i = 0 ; i < masses.length ; i++)
+{
+    for (let j = i + 1 ; j < masses.length ; j++) {
+        if (i != j) {
+        springs.push(new Spring(masses[i], masses[j]));
+        }
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+
+        let dir = new THREE.Vector3(Math.random() * 10 - 5 , 30.0, Math.random() * 10 - 5 )
+        for (let m of masses) {
+            m.velocity.add(dir);    
+        }
+    }
+
+    if (event.key === 'f') {
+
+        let dir = new THREE.Vector3(Math.random() * 10 - 5 , 30.0, Math.random() * 10 - 5 )
+        for (let m of masses) {
+            m.velocity.add(dir);    
+        }
+    }
+    if (event.key === 'z') {
+
+        let dir = new THREE.Vector3(Math.random() * 10 - 5 , 30.0, Math.random() * 10 - 5 )
+        for (let m of masses) {
+            m.velocity.add(dir);    
+        }
+    }
+})
+
+
+let clock = new THREE.Clock();
+
 
 // Main loop
 gsap.ticker.add(() => {
+
+    let deltaTime = clock.getDelta();
+
+    for (let m of masses) {
+        m.updatePosition(deltaTime);
+    }
+
+    for (let s of springs) { 
+        s.applyConstraint();
+        s.avoidExchange();
+    }
+
+    let vertices = geometry.getAttribute('position').array;
+    for (let i = 0; i < masses.length ; i++) {
+        vertices[i * 3] = masses[i].position.x;
+        vertices[i * 3 + 1] = masses[i].position.y;
+        vertices[i * 3 + 2] = masses[i].position.z;
+    }
+
+    geometry.computeVertexNormals();
+    geometry.getAttribute("position").needsUpdate = true;
 
     stats.update();
     renderer.render(scene, camera);
