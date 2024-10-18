@@ -87,7 +87,13 @@ gui.add(params, "showHelpers");
 // Particule
 export default class Particule {
     constructor(_pos, _velocity, _geom) {
-        this.material = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 1.0 });
+        this.material = new THREE.MeshBasicMaterial({
+            map: sprite,
+            depthTest: false,
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.2,
+            alphaTest: 0.05,});
 
         this.mesh = new THREE.Mesh(_geom, this.material);
         let size = .3;
@@ -114,9 +120,9 @@ export default class Particule {
 function spawnRandomParticule(pos) {
     let speedFactor = 0.1
     let vel = new THREE.Vector3(
-        speedFactor * (Math.random() * 2.0 - 1.0),
-        speedFactor * (Math.random() * 5.0),
-        speedFactor * (Math.random() * 2.0 - 1.0)
+        speedFactor * (rand(-1, 1)),
+        speedFactor * (rand(0, 5)),
+        speedFactor * (rand(-1, 1))
     );
 
 
@@ -127,13 +133,19 @@ function spawnRandomParticule(pos) {
 const sphereGeometry = new THREE.SphereGeometry();
 let emitterPos = new THREE.Vector3(0, 0, 0);
 
-
 let particules = [];
+
+let sprite = new THREE.TextureLoader().load('spark1.png');
 
 let clock = new THREE.Clock();
 
+function rand(min, max) {
+    return min + Math.random() * (max - min);
+}
+
 // Main loop
 gsap.ticker.add(() => {
+
     let deltaTime = clock.getDelta();
 
     for (let i = 0; i < 20; i++) {

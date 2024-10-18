@@ -84,71 +84,101 @@ const params = {
 }
 gui.add(params, "showHelpers");
 
-// Particule
+// Particle
 export default class Particule {
-    constructor(_pos, _velocity, _geom) {
-        this.material = new THREE.MeshBasicMaterial({ color: 0xff69b4, transparent: true, opacity: 1.0 });
-
-        this.mesh = new THREE.Mesh(_geom, this.material);
-        let size = .3;
-        this.mesh.scale.set(size, size, size);
-        this.mesh.position.set(_pos.x, _pos.y, _pos.z);
+    constructor(_pos, _velocity, _vertices, _particleId) {
+        this.index = _particleId;
+        this.vertices = _vertices;
+        this.vertices[this.index * 3] = _pos.x;
+        this.vertices[this.index * 3 + 1] = _pos.y;
+        this.vertices[this.index * 3 + 2] = _pos.z;
 
         this.velocity = _velocity.clone();
-        this.alpha = 255;
-    }
+        this.alpha = 1.0;
 
+    }
 
     update(dt) {
-        this.mesh.position.add(this.velocity);
-        this.alpha -= 5;
-        this.material.opacity = this.alpha / 255.0;
-    }
+        this.vertices[this.index * 3] += this.velocity.x * dt;
+        this.vertices[this.index * 3 + 1] += this.velocity.y * dt;
+        this.vertices[this.index * 3 + 2] += this.velocity.z * dt;
 
+        this.alpha -= 0.01;
+    }
 
     finished() {
         return this.alpha <= 0;
     }
 }
 
-function spawnRandomParticule(pos) {
-    let speedFactor = 0.1
-    let vel = new THREE.Vector3(
-        speedFactor * (Math.random() * 2.0 - 1.0),
-        speedFactor * (Math.random() * 5.0),
-        speedFactor * (Math.random() * 2.0 - 1.0)
-    );
-
-
-    let particule = new Particule(pos, vel, sphereGeometry);
-    return particule;
-}
-
 const sphereGeometry = new THREE.SphereGeometry();
+
+let availableParticlesId = [];
+let activeParticles = [];
 let emitterPos = new THREE.Vector3(0, 0, 0);
 
+let geometry = new THREE.BufferGeometry();
+let vertices = [];
 
-let particules = [];
+const N = 1050;
+
+for (let i = 0; i < N; i++) {
+    vertices.push(0, -10000, 0);
+    availableParticlesId.push(i);
+}
+
+geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+
+let sprite = new THREE.TextureLoader().load('spark1.png');
+let material = new THREE.PointsMaterial({
+    size: 1,
+    map: sprite,
+    depthTest: false,
+    color: 0xFF00FF,
+    transparent: true,
+    opacity: 0.2,
+    alphaTest: 0.05,
+    sizeAttenuation: true
+});
+
+scene.add(new THREE.Points(geometry, material));
 
 let clock = new THREE.Clock();
 
 // Main loop
 gsap.ticker.add(() => {
+
     let deltaTime = clock.getDelta();
 
-    for (let i = 0; i < 20; i++) {
-        let particule = spawnRandomParticule(emitterPos);
-        scene.add(particule.mesh);
-        particules.push(particule);
-    }
 
-    for (let i = particules.length - 1; i >= 0; i--) {
-        particules[i].update(deltaTime);
-        if (particules[i].finished()) {
-            scene.remove(particules[i].mesh);
-            particules.splice(i, 1);
+    let vertices = geometry.getAttribute('position').array;
+
+    if (availableParticlesId.length > 10) {
+        for (let i = 0; i < 10; i++) {
+            let particuleId = availableParticlesId[0];
+            let vel = new THREE.Vector3(
+                (Math.random() * 2.0 - 1.0),
+                (Math.random() * 4.0 + 1.0),
+                (Math.random() * 2.0 - 1.0)
+            );
+            let p = new Particule(emitterPos, vel, vertices, particuleId);
+            activeParticles.push(p);
+
+            availableParticlesId.splice(0, 1);
         }
     }
+
+    for (let i = activeParticles.length - 1; i >= 0; i--) {
+
+        activeParticles[i].update(deltaTime);
+
+        if (activeParticles[i].finished()) {
+            availableParticlesId.push(activeParticles[i].index);
+            activeParticles.splice(i, 1);
+        }
+    }
+
+    geometry.getAttribute('position').needsUpdate = true;
 
     stats.update();
     renderer.render(scene, camera);
